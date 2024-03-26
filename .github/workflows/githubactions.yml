@@ -1,0 +1,79 @@
+name: Deploy to Staging
+
+on: 
+  push:
+    branches: [ development ]
+
+jobs:
+  deploy-staging: 
+    runs-on: ubuntu-latest
+    if:   github.ref == 'refs/heads/development'
+    steps:
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      # Ignore the failure of a step and avoid terminating the job.
+      continue-on-error: true
+
+    - name: Save my code in site directory
+      uses: actions/checkout@v3  
+      with: 
+        token: ${{ secrets.GIT_PAT }} #Your GitHub access token
+        ref: development
+
+    - name: Set my ssh key and ssh-agent
+      uses: webfactory/ssh-agent@v0.1.1
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
+    
+    - name: Install dependencies
+      run: yarn install
+      working-directory: src
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    # install Docker and enable docker service
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Run test
+      run: docker-compose run addressbook npm test
+      working-directory: src
+
+    - name: Run playbook
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        # Required, playbook filepath
+        playbook: deploy.yml
+        # Optional, directory where playbooks live
+        directory: ./ansible
+        inventory: |
+          [staging]
+          165.227.139.136
+
+          [web]
+          165.227.139.136
+        # Optional, ansible configuration file content (ansible.cfg)
+        configuration: |
+          [defaults]
+          host_key_checking = True
+          log_path = /var/log/ansible.log
+          force_color = True
+          inventory = hosts
+
+          [ssh_connection]
+          ssh_args = -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s -o HostKeyAlgorithms=ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,ssh-rsa
+          retries = 1
+        # Optional, SSH private key
+        key: ${{secrets.SSH_PRIVATE_KEY}}
+        # Optional, additional flags to pass to ansible-playbook
+        options: |
+          --e env=staging
+
+

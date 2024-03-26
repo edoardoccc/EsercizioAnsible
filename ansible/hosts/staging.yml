@@ -1,0 +1,12 @@
+all:
+  hosts:
+    staging:
+      ansible_host: 165.232.71.92
+      ansible_user: root
+  children:
+    staging:
+      hosts:
+        staging:
+    web:
+      hosts:
+        staging:

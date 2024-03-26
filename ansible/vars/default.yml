@@ -1,0 +1,11 @@
+---
+mysql_root_password: "P@ssw0rd"
+http_host: "ansible.sitointest.it"
+http_conf: "ansible.sitointest.it"
+http_port: "80"
+sshd_permit_root_login: true
+disable_default: true
+project_repo: "git@github.com:jump-group/devops-full-exercise.git"
+project_branch: "development"
+sshd_password_authentication: true
+vault_become_password: "password"

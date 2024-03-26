@@ -1,0 +1,27 @@
+---
+- name: Clone Repository
+  hosts: web:&{{ env }}
+  vars_files:
+    - vars/default.yml
+    - vars/users.yml
+  remote_user: "{{ web_user }}"
+  tasks:
+    - name: Remove Old Directory
+      file:
+        path: "/var/www/{{ http_host }}/edo"
+        state: absent
+
+    - name: Clone Repository
+      git:
+        repo: "{{ project_repo }}"
+        dest: "/var/www/{{ http_host }}/edo"
+        version: "{{ project_branch }}"
+        accept_hostkey: yes
+
+    #start docker compose
+    - name: Start Docker Compose
+      command: docker compose -f /var/www/{{ http_host }}/edo/docker-compose.yml up -d
+      args:
+        chdir: /var/www/{{ http_host }}/edo
+    
+    

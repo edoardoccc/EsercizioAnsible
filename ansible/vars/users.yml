@@ -1,0 +1,27 @@
+# Documentation: https://roots.io/trellis/docs/ssh-keys/
+admin_user: ubuntu
+
+# Also define 'vault_users' (`group_vars/staging/vault.yml`, `group_vars/production/vault.yml`)
+users:
+  - name: "{{ web_user }}"
+    groups:
+      - "{{ web_group }}"
+    keys:
+      - https://github.com/giade.keys
+      - https://github.com/edoardoccc.keys
+      - https://github.com/giadabot.keys
+    
+    
+
+  - name: "{{ admin_user }}"
+    groups:
+      - sudo
+    keys:
+      - https://github.com/giade.keys
+      - https://github.com/edoardoccc.keys
+      - https://github.com/giadabot.keys
+    
+
+web_user: web
+web_group: www-data
+web_password: "password"
