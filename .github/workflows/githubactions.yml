@@ -2,12 +2,12 @@ name: Deploy to Staging
 
 on: 
   push:
-    branches: [ development ]
+    branches: [ main ]
 
 jobs:
   deploy-staging: 
     runs-on: ubuntu-latest
-    if:   github.ref == 'refs/heads/development'
+    if:   github.ref == 'refs/heads/main'
     steps:
     - uses: satackey/action-docker-layer-caching@v0.0.11
       # Ignore the failure of a step and avoid terminating the job.
@@ -16,8 +16,7 @@ jobs:
     - name: Save my code in site directory
       uses: actions/checkout@v3  
       with: 
-        token: ${{ secrets.GIT_PAT }} #Your GitHub access token
-        ref: development
+        ref: main
 
     - name: Set my ssh key and ssh-agent
       uses: webfactory/ssh-agent@v0.1.1
